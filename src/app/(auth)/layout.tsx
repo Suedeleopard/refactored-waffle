@@ -1,0 +1,14 @@
+import { Logo } from "@/components/logo";
+
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="brand-glow flex min-h-svh flex-col items-center justify-center px-6 py-12">
+      <div className="mb-8">
+        <Logo />
+      </div>
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8">
+        {children}
+      </div>
+    </div>
+  );
+}
