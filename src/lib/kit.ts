@@ -84,6 +84,21 @@ export const methodSteps: MethodStep[] = [
   },
 ];
 
+/*
+  How much of the method is readable before paying.
+
+  Steps 1 and 2 are the setup — worth giving away, because they prove the thing
+  is real and they're the part people can half-guess anyway. The value starts at
+  step 3, where you choose which industry to borrow from. That's the bit a bad
+  version of this method gets wrong, and it's what the £39 actually buys.
+
+  Locked steps still show their titles. Titles create the itch; bodies scratch it.
+*/
+export const PREVIEW_STEP_COUNT = 2;
+
+export const previewSteps = methodSteps.slice(0, PREVIEW_STEP_COUNT);
+export const lockedSteps = methodSteps.slice(PREVIEW_STEP_COUNT);
+
 /** The one-page worksheet. Eight blanks, filled against one live opportunity. */
 export const worksheetPrompts: string[] = [
   "Sell…",

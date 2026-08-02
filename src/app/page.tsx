@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check, Target, Layers, BookOpen, FileText } from "lucide-react";
+import { ArrowRight, Check, Target, Layers, BookOpen, FileText, Lock } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { LeadForm } from "@/components/lead-form";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { marketing, plans, sprint } from "@/lib/config";
 import { getTeardowns } from "@/lib/teardowns";
+import { previewSteps, lockedSteps, worksheetPrompts, outreachTemplates } from "@/lib/kit";
 
 // Copy comes from src/lib/config.ts (marketing.features). Icons are paired by
 // position here; edit the words in config, swap icons here if you like.
@@ -143,6 +144,69 @@ export default function Home() {
                 successMessage="On its way. Check your inbox in the next minute or two."
               />
             </div>
+          </div>
+        </section>
+
+        {/* Look inside — the first steps are readable before paying. Nobody
+            buys a method they haven't seen the shape of. */}
+        <section id="inside" className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <Badge variant="muted" className="mb-5">
+              Look inside
+            </Badge>
+            <h2 className="font-display text-4xl font-light tracking-tight">
+              The first two steps, free.
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Read them, use them, decide afterwards. The method is {previewSteps.length + lockedSteps.length}{" "}
+              steps and the hard part is choosing which industry to borrow from &mdash; which is
+              where this preview stops.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 max-w-3xl space-y-3">
+            {previewSteps.map((step) => (
+              <Card key={step.n}>
+                <CardContent className="p-7">
+                  <div className="flex gap-5">
+                    <span className="font-display text-2xl font-light text-muted-foreground/50">
+                      {String(step.n).padStart(2, "0")}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold">{step.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">{step.body}</p>
+                      <p className="mt-3 border-l-2 border-primary/50 pl-3 text-sm font-medium">
+                        {step.prompt}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* Locked: titles only. The titles are the itch. */}
+            <Card className="border-dashed">
+              <CardContent className="p-7">
+                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                  <Lock className="size-4" />
+                  <span>The remaining {lockedSteps.length} steps are in The Kit</span>
+                </div>
+                <ul className="mt-5 space-y-2.5">
+                  {lockedSteps.map((step) => (
+                    <li key={step.n} className="flex items-baseline gap-4 text-sm">
+                      <span className="font-display text-base font-light text-muted-foreground/40">
+                        {String(step.n).padStart(2, "0")}
+                      </span>
+                      <span className="text-muted-foreground/70">{step.title}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-6 border-t border-border pt-5 text-sm text-muted-foreground">
+                  Plus the {worksheetPrompts.length}-blank worksheet and{" "}
+                  {outreachTemplates.length} outreach templates for actually sending it.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </section>
 

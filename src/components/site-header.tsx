@@ -15,7 +15,7 @@ export function SiteHeader() {
           <Link href="/#method" className="hover:text-foreground transition-colors">
             The method
           </Link>
-          <Link href="/#kit" className="hover:text-foreground transition-colors">
+          <Link href="/#inside" className="hover:text-foreground transition-colors">
             The Kit
           </Link>
           <Link href="/sprint" className="hover:text-foreground transition-colors">
