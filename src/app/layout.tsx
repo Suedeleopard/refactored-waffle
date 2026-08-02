@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Anonymous_Pro } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/config";
-import { DemoBanner } from "@/components/demo-banner";
 
 // Sans + display. Poppins covers body and headings (light weights read as display).
 const poppins = Poppins({
@@ -37,7 +36,6 @@ export default function RootLayout({
       className={`${poppins.variable} ${anonymousPro.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <DemoBanner />
         {children}
       </body>
     </html>
