@@ -145,7 +145,8 @@ export default async function DashboardPage() {
       <section>
         <h2 className="font-display text-2xl font-light tracking-tight">The swipe file</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {getTeardowns().length} worked teardowns, with more added as they&rsquo;re published.
+          {getTeardowns().length}{" "}
+          worked teardowns, with more added as they&rsquo;re published.
         </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Card className="transition-colors hover:border-primary/40">
