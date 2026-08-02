@@ -9,11 +9,17 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Logo />
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
-          <Link href="/#features" className="hover:text-foreground transition-colors">
-            Features
+          <Link href="/teardowns" className="hover:text-foreground transition-colors">
+            Teardowns
           </Link>
-          <Link href="/#pricing" className="hover:text-foreground transition-colors">
-            Pricing
+          <Link href="/#method" className="hover:text-foreground transition-colors">
+            The method
+          </Link>
+          <Link href="/#kit" className="hover:text-foreground transition-colors">
+            The Kit
+          </Link>
+          <Link href="/sprint" className="hover:text-foreground transition-colors">
+            Pitch Sprint
           </Link>
         </nav>
         <div className="flex items-center gap-2">

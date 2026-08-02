@@ -1,0 +1,144 @@
+/* ════════════════════════════════════════════════════════════════════════
+   THE SWIPE FILE — this is the marketing.
+
+   Every teardown here does three jobs at once: it proves the method works,
+   it feeds the weekly post, and it is an unsolicited pitch to whoever runs
+   that category. Adding one is the highest-leverage hour of the week.
+
+   To add a teardown: copy the shape below and put it at the top of the
+   array. Newest first. No CMS, no build step, no database.
+   ════════════════════════════════════════════════════════════════════════ */
+
+export type Teardown = {
+  /** URL segment: /teardowns/<slug> */
+  slug: string;
+  /** The anchor. The business whose behaviour is being swapped. */
+  x: string;
+  /** The parallel. The industry whose behaviour is being borrowed. */
+  y: string;
+  /** Shown as the headline. Usually "A [x] behaving like a [y]". */
+  title: string;
+  /** One line for cards and previews. */
+  standfirst: string;
+  /** The audience both industries already share. This is the whole argument. */
+  sharedAudience: string;
+  /** Why this pairing is not random — the friction in X that Y already solves. */
+  rationale: string;
+  /** The ideas. Four to six is the right number: enough to prove it, few enough to read. */
+  ideas: { name: string; body: string }[];
+  /** Free-text date label, e.g. "March 2026". Display only. */
+  published: string;
+};
+
+export const teardowns: Teardown[] = [
+  {
+    slug: "restaurant-art-gallery",
+    x: "Restaurant",
+    y: "Art gallery",
+    title: "A restaurant behaving like an art gallery",
+    standfirst:
+      "Dishes arrive, get eaten, and vanish. Galleries treat the same act of making as something with provenance, scarcity and a name attached.",
+    sharedAudience:
+      "People who will happily spend eighty pounds on dinner and two hundred on a print. They are buying the same thing in both places: a story they can retell.",
+    rationale:
+      "A restaurant's core friction is that its best work is forgettable by design. You ate it, it is gone, there is no record. Galleries solved this centuries ago with provenance, editions, private views and residencies. None of that requires better food. It only requires treating the plate as an object with a history.",
+    ideas: [
+      {
+        name: "The Provenance Card",
+        body: "Every dish comes with a card. The farm. The farmer's name. The date it was harvested. The technique and where the chef learned it. The card is yours to keep. The meal becomes an object with a history, not just a plate of food.",
+      },
+      {
+        name: "The Artist in Residence",
+        body: "A guest chef takes the kitchen for thirty days. Their name above the door, their menu, their hours, their rules. At the end the dishes are retired and the chef moves on. You either ate there or you didn't.",
+      },
+      {
+        name: "The Commission",
+        body: "One conversation with the chef about your memories and your ingredients. The chef disappears for a week. The dish arrives at a private dinner for two, will never be made again, and the recipe is handed over in a sealed envelope. You own it.",
+      },
+      {
+        name: "The Private View",
+        body: "Before a new menu launches, twelve invited guests attend the tasting as critics rather than customers. They score each dish, their notes decide what stays, and their names appear on the final menu beside the dishes they championed.",
+      },
+      {
+        name: "The Edition",
+        body: "A dish that sold out returns once, as a numbered edition. Edition 1 of 12. Diners who ate it first are contacted first. When the edition closes the dish is photographed and archived into the restaurant's permanent collection.",
+      },
+    ],
+    published: "March 2026",
+  },
+  {
+    slug: "laundry-salon-haircare",
+    x: "Laundry detergent",
+    y: "Salon haircare",
+    title: "A laundry detergent behaving like salon haircare",
+    standfirst:
+      "Detergent sells on chemistry and price. Haircare sells on ritual, fragrance and the idea that the good stuff is worth paying for.",
+    sharedAudience:
+      "The person who spends thirty pounds on shampoo without blinking and then buys whichever detergent is on promotion. Same person, same bathroom shelf, two completely different mindsets.",
+    rationale:
+      "Detergent has spent decades competing on a functional axis nobody enjoys: whiteness, stain removal, price per wash. Haircare occupies the same physical category — a liquid in a bottle that cleans something — but behaves like fragrance. Shampoo and conditioner as a pair. Named scents. Discovery sets. Clean chemistry as a badge. Borrowing that behaviour costs nothing in formulation and changes everything in shelf presence.",
+    ideas: [
+      {
+        name: "Shampoo and conditioner, not detergent and softener",
+        body: "Rename the pair to borrow the haircare ritual outright. Laundry Shampoo cleans, Laundry Conditioner scents and protects. The two-step habit is already installed in the customer, just in a different room of the house.",
+      },
+      {
+        name: "Fragrance as the hero",
+        body: "Name the scents the way a perfume house would, not the way a supermarket would. Oud. Fresh Pistachio. Date Night. Cocoa Butter Kisses. The scent becomes the reason to choose, and the reason to repurchase.",
+      },
+      {
+        name: "The discovery set",
+        body: "A sample sachet of every fragrance, one wash each, in a set with a branded wash bag. It is exactly how fragrance counters convert browsers, applied to a category that has never offered a trial.",
+      },
+      {
+        name: "Fabric cleansing perfume",
+        body: "A between-wash spray that scents and sanitises. Haircare has dry shampoo for the days between. Laundry has nothing, despite the identical need.",
+      },
+      {
+        name: "Made in the UK, on the front",
+        body: "Salon brands put provenance and clean chemistry on the front of the bottle because their customer reads it as quality. Detergent buries the same information on the back in six point type.",
+      },
+    ],
+    published: "February 2026",
+  },
+  {
+    slug: "gym-music-festival",
+    x: "Gym",
+    y: "Music festival",
+    title: "A gym behaving like a music festival",
+    standfirst:
+      "Gyms sell access to equipment and then wonder why January's members are gone by March. Festivals sell an event people plan their year around.",
+    sharedAudience:
+      "Health-conscious professionals in their twenties and thirties who will pay £250 for a weekend in a field and then cancel a £40 membership because they stopped enjoying it.",
+    rationale:
+      "A gym's real competitor is not another gym. It is brunch, and nightlife, and everything else that makes a Saturday feel social. Festivals have the emotional architecture gyms lack entirely: line-ups, anticipation, a date in the diary, shared effort, and a reason to buy the shirt afterwards. The equipment does not need to change.",
+    ideas: [
+      {
+        name: "The line-up",
+        body: "Publish a season of instructors the way a festival announces its bill. Headliners, support, one-off appearances. Members book a name and a moment rather than a slot in a timetable.",
+      },
+      {
+        name: "Sweatstock",
+        body: "One day a season, the gym takes over an outdoor space. Group workouts, food, live music, the whole membership in one place. The event people plan around becomes the thing the membership is actually for.",
+      },
+      {
+        name: "The merch drop",
+        body: "Limited kit tied to each season, sized for the people who were there. Festivals understand that the shirt is proof of attendance, not advertising.",
+      },
+      {
+        name: "The wristband",
+        body: "Tiered access with a physical token. What you can get into, and when, is visible on your wrist. Status made legible in a category that currently hides it in a billing system.",
+      },
+    ],
+    published: "January 2026",
+  },
+];
+
+/** Newest first, as authored. */
+export function getTeardowns(): Teardown[] {
+  return teardowns;
+}
+
+export function getTeardown(slug: string): Teardown | undefined {
+  return teardowns.find((t) => t.slug === slug);
+}

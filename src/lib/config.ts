@@ -14,10 +14,10 @@ export const siteConfig = {
   /** Your product's name. Shown in the nav, page titles, emails. */
   name: "X Behaving Like Y",
   /** One-line positioning, shown after the name in the browser tab. */
-  tagline: "The thinking tool that makes ordinary briefs behave like something worth remembering.",
+  tagline: "A method for not sounding like everyone else in the room.",
   /** Meta/OG description for search + social sharing. */
   description:
-    "A short, self-contained kit that teaches one creative framework mid-level freelancers can use on their very next brief — the method, a swipe file of worked examples, and a one-page worksheet.",
+    "X Behaving Like Y is a method for winning work you shouldn't win. Borrow behaviour from an industry your client's audience already trusts, so your thinking lands as new enough to notice and familiar enough to say yes to.",
   /** Your public URL (no trailing slash). Set automatically from NEXT_PUBLIC_SITE_URL. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   /** The from/support address for emails. */
@@ -32,17 +32,43 @@ export const siteConfig = {
 /* ── Marketing copy (the landing page) ────────────────────────────────────── */
 export const marketing = {
   hero: {
-    badge: "A one-sitting creative kit",
-    headlineTop: "Make it behave like",
-    headlineAccent: "something worth remembering.",
+    badge: "The method, the swipe file, the worksheet",
+    headlineTop: "Everyone in the room",
+    headlineAccent: "is saying the same thing.",
     subhead:
-      "A short, self-contained kit that teaches one creative framework mid-level freelancers can use on their very next brief — take a familiar thing and make it behave like something unexpected, so the work stops looking like everyone else's.",
+      "X Behaving Like Y is a method for borrowing behaviour from an industry your client's audience already trusts. New enough to get noticed. Familiar enough to get adopted. Built for the pitch you have to win, not for a brainstorm.",
   },
   features: [
-    { title: "One method", body: "A single creative framework you can run on your very next brief." },
-    { title: "Worked examples", body: "A swipe file showing the method applied to real briefs." },
-    { title: "One-page worksheet", body: "Run it against a live project and see it work immediately." },
-    { title: "Own it once", body: "Pay once, keep it forever — no subscription." },
+    {
+      title: "Same audience, different behaviour",
+      body: "The whole method in one line. Borrow from where your client's customers already spend money and the risk of a bold idea drops away.",
+    },
+    {
+      title: "Built for a live opportunity",
+      body: "Not a creativity exercise. Run it against the thing you actually have to win, with a deadline attached.",
+    },
+    {
+      title: "A swipe file you can read first",
+      body: "Worked examples across sectors, so you can watch the method land before you trust it with your own pitch.",
+    },
+    {
+      title: "One page, one sitting",
+      body: "The worksheet turns eleven steps into a page you fill in. No workshop, no facilitator, no away day.",
+    },
+  ],
+} as const;
+
+/* ── The high-end tier (enquiry, not checkout) ────────────────────────────── */
+export const sprint = {
+  name: "The Pitch Sprint",
+  priceLabel: "From £8,000",
+  summary:
+    "You are pitching for something that matters and you cannot afford to sound like the other four people in the process. Two weeks, fixed scope, one live opportunity.",
+  deliverables: [
+    "A behavioural angle nobody else in the process will bring",
+    "The strategic spine of your pitch, built end to end",
+    "A presentation section designed to be the thing they remember",
+    "The evidence that makes a bold idea feel safe to approve",
   ],
 } as const;
 
@@ -75,31 +101,20 @@ export const plans: Plan[] = [
     id: "kit",
     name: "The Kit",
     description:
-      "The framework, the worked examples, and the worksheet. Everything a freelancer needs to apply it on Monday morning.",
-    priceLabel: "£29",
+      "The full method, the swipe file, and the worksheet. Everything you need to run X Behaving Like Y against a live opportunity on your own.",
+    priceLabel: "£39",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER,
     mode: "payment",
-    amount: 29,
+    featured: true,
+    amount: 39,
     currency: "gbp",
     priceEnvKey: "NEXT_PUBLIC_STRIPE_PRICE_STARTER",
-    features: ["The framework", "A swipe file of worked examples", "One-page worksheet"],
-  },
-  {
-    id: "kit-vault",
-    name: "The Kit + Vault",
-    description:
-      "Everything in The Kit, plus an expanded library of examples across sectors and a set of prompts to keep generating fresh angles.",
-    priceLabel: "£49",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
-    mode: "payment",
-    featured: true,
-    amount: 49,
-    currency: "gbp",
-    priceEnvKey: "NEXT_PUBLIC_STRIPE_PRICE_PRO",
     features: [
-      "Everything in The Kit",
-      "Expanded example library across sectors",
-      "Reusable prompts for fresh angles",
+      "The eleven-step method, written out in full",
+      "The swipe file of worked teardowns",
+      "The one-page worksheet",
+      "The outreach templates",
+      "Yours forever, no subscription",
     ],
   },
 ];
