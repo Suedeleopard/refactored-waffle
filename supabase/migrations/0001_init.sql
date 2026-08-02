@@ -63,11 +63,34 @@ create policy "Subscriptions are viewable by their owner"
 -- No insert/update/delete policies: only the service role (webhook) writes here.
 
 -- ─────────────────────────────────────────────────────────────
+-- purchases  (one-time payments, written only by the Stripe webhook)
+-- ─────────────────────────────────────────────────────────────
+create table if not exists public.purchases (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  plan_id text not null,
+  price_id text,
+  stripe_customer_id text,
+  stripe_checkout_session_id text unique,
+  amount_total integer,
+  currency text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.purchases enable row level security;
+
+create policy "Purchases are viewable by their owner"
+  on public.purchases for select
+  using (auth.uid() = user_id);
+-- No insert/update/delete policies: only the service role (webhook) writes here.
+
+-- ─────────────────────────────────────────────────────────────
 -- Role privileges
 -- RLS above controls *row* access for anon/authenticated. These table-level
 -- grants are still required on top of RLS — and service_role (which bypasses
--- RLS) needs them so the Stripe webhook can write subscription rows. Without
--- these, writes fail with "permission denied for table".
+-- RLS) needs them so the Stripe webhook can write subscription/purchase rows.
+-- Without these, writes fail with "permission denied for table".
 -- ─────────────────────────────────────────────────────────────
 grant select, insert, update, delete on public.profiles to anon, authenticated, service_role;
 grant select, insert, update, delete on public.subscriptions to anon, authenticated, service_role;
+grant select, insert, update, delete on public.purchases to anon, authenticated, service_role;

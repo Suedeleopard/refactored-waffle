@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { marketing, plans, siteConfig } from "@/lib/config";
+import { marketing, plans } from "@/lib/config";
 
 // Copy comes from src/lib/config.ts (marketing.features). Icons are paired by
 // position here; edit the words in config, swap icons here if you like.
@@ -41,9 +41,6 @@ export default function Home() {
                 <Link href="/#features">See what&apos;s inside</Link>
               </Button>
             </div>
-            <p className="mt-6 font-mono text-xs text-muted-foreground">
-              Next.js · Supabase · Stripe · Tailwind
-            </p>
           </div>
         </section>
 
@@ -71,7 +68,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-4xl font-light tracking-tight">Pricing</h2>
             <p className="mt-3 text-muted-foreground">
-              Wire these to Stripe in the setup wizard. Edit them in one config file.
+              Pay once. Own it forever.
             </p>
           </div>
           <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-2">
@@ -99,7 +96,7 @@ export default function Home() {
                     className="mt-8 w-full"
                     variant={plan.featured ? "default" : "outline"}
                   >
-                    <Link href="/signup">Start with {plan.name}</Link>
+                    <Link href="/signup">Get {plan.name}</Link>
                   </Button>
                 </CardContent>
               </Card>

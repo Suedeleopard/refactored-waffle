@@ -11,17 +11,17 @@
    ════════════════════════════════════════════════════════════════════════ */
 
 export const siteConfig = {
-  /** PLACEHOLDER — your product's name. Shown in the nav, page titles, emails. */
-  name: "TSC Starter",
-  /** PLACEHOLDER — one-line positioning, shown after the name in the browser tab. */
-  tagline: "Ship a microSaaS in a weekend",
-  /** PLACEHOLDER — meta/OG description for search + social sharing. */
+  /** Your product's name. Shown in the nav, page titles, emails. */
+  name: "X Behaving Like Y",
+  /** One-line positioning, shown after the name in the browser tab. */
+  tagline: "The thinking tool that makes ordinary briefs behave like something worth remembering.",
+  /** Meta/OG description for search + social sharing. */
   description:
-    "An off-the-shelf SaaS install — auth, billing, and a guided setup wizard, ready to make your own.",
+    "A short, self-contained kit that teaches one creative framework mid-level freelancers can use on their very next brief — the method, a swipe file of worked examples, and a one-page worksheet.",
   /** Your public URL (no trailing slash). Set automatically from NEXT_PUBLIC_SITE_URL. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  /** PLACEHOLDER — the from/support address for emails. Use a real one before launch. */
-  supportEmail: "support@example.com",
+  /** The from/support address for emails. */
+  supportEmail: "thad@thadcox.co.uk",
   /** PLACEHOLDER — your links. */
   links: {
     twitter: "https://twitter.com/",
@@ -29,32 +29,27 @@ export const siteConfig = {
   },
 } as const;
 
-/* ── Marketing copy (the landing page) ──────────────────────────────────────
-   PLACEHOLDER copy that currently describes the TSC Starter itself. Replace it
-   with copy for YOUR product — what it is and why someone should sign up. */
+/* ── Marketing copy (the landing page) ────────────────────────────────────── */
 export const marketing = {
   hero: {
-    badge: "Example landing page",
-    headlineTop: "Your big idea,",
-    headlineAccent: "live by the weekend.",
+    badge: "A one-sitting creative kit",
+    headlineTop: "Make it behave like",
+    headlineAccent: "something worth remembering.",
     subhead:
-      "This is placeholder hero copy. Describe your product here — the outcome a customer gets — then point them at sign-up.",
+      "A short, self-contained kit that teaches one creative framework mid-level freelancers can use on their very next brief — take a familiar thing and make it behave like something unexpected, so the work stops looking like everyone else's.",
   },
-  /** PLACEHOLDER feature cards. Swap these for your product's real benefits. */
   features: [
-    { title: "Auth, done", body: "Email + social login and protected routes, wired in." },
-    { title: "Billing, done", body: "Stripe checkout, the customer portal, and subscription sync." },
-    { title: "Guided setup", body: "A built-in wizard connects your services without env spelunking." },
-    { title: "One product slot", body: "Build your feature into a clean, opinionated foundation." },
+    { title: "One method", body: "A single creative framework you can run on your very next brief." },
+    { title: "Worked examples", body: "A swipe file showing the method applied to real briefs." },
+    { title: "One-page worksheet", body: "Run it against a live project and see it work immediately." },
+    { title: "Own it once", body: "Pay once, keep it forever — no subscription." },
   ],
 } as const;
 
 /* ── Pricing plans ──────────────────────────────────────────────────────────
-   ⚠️ EXAMPLE PLANS — PLACEHOLDERS. These "Basic / Pro" plans exist only to
-   demonstrate that billing works end-to-end. They are NOT your real pricing,
-   and they are NOT a fee to use TSC Starter. Replace them with the plans YOUR
-   customers will pay for. The setup wizard's "Create my plans" button builds
-   whatever you define here in your own Stripe account. */
+   Both plans below are one-time purchases (mode: "payment") — pay once, own it
+   forever. The setup wizard's "Create my plans" button builds whatever you
+   define here in your own Stripe account. */
 export type Plan = {
   id: string;
   name: string;
@@ -67,44 +62,44 @@ export type Plan = {
   featured?: boolean;
   mode: "subscription" | "payment";
   /** Structured pricing — used by the wizard to create this plan in Stripe. */
-  amount: number; // major units, e.g. 19 = $19.00
-  currency: string; // ISO code, e.g. "usd"
-  interval: "month" | "year";
+  amount: number; // major units, e.g. 29 = £29.00
+  currency: string; // ISO code, e.g. "gbp"
+  /** Billing interval — only used when mode is "subscription". */
+  interval?: "month" | "year";
   /** The env var this plan's Price ID is written to. */
   priceEnvKey: string;
 };
 
 export const plans: Plan[] = [
   {
-    id: "basic",
-    name: "Basic", // EXAMPLE plan name — replace with your own
-    description: "Example plan — replace with your own.",
-    priceLabel: "$19/mo",
+    id: "kit",
+    name: "The Kit",
+    description:
+      "The framework, the worked examples, and the worksheet. Everything a freelancer needs to apply it on Monday morning.",
+    priceLabel: "£29",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER,
-    mode: "subscription",
-    amount: 19,
-    currency: "usd",
-    interval: "month",
+    mode: "payment",
+    amount: 29,
+    currency: "gbp",
     priceEnvKey: "NEXT_PUBLIC_STRIPE_PRICE_STARTER",
-    features: ["Example feature one", "Example feature two", "Email support"],
+    features: ["The framework", "A swipe file of worked examples", "One-page worksheet"],
   },
   {
-    id: "pro",
-    name: "Pro", // EXAMPLE plan name — replace with your own
-    description: "Example plan — replace with your own.",
-    priceLabel: "$49/mo",
+    id: "kit-vault",
+    name: "The Kit + Vault",
+    description:
+      "Everything in The Kit, plus an expanded library of examples across sectors and a set of prompts to keep generating fresh angles.",
+    priceLabel: "£49",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
-    mode: "subscription",
+    mode: "payment",
     featured: true,
     amount: 49,
-    currency: "usd",
-    interval: "month",
+    currency: "gbp",
     priceEnvKey: "NEXT_PUBLIC_STRIPE_PRICE_PRO",
     features: [
-      "Everything in Basic",
-      "Example feature three",
-      "Priority support",
-      "Example feature four",
+      "Everything in The Kit",
+      "Expanded example library across sectors",
+      "Reusable prompts for fresh angles",
     ],
   },
 ];

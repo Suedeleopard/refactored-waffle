@@ -124,7 +124,7 @@ export const SETUP_STEPS: SetupStepDef[] = [
       },
       {
         title: "Create your plans and copy each Price ID",
-        body: "Easiest way: once your secret key is in the box, use the “Create my plans in Stripe” button below and the app builds them for you and fills in the Price IDs — skip the rest of this step. Prefer to do it by hand? Open “Products” → “Add product”, name it (e.g. Basic), set the amount, pick “Recurring” (monthly or yearly), and save. Then open the product, click the price you made, and copy the “Price ID” from the top-right of the price page — it starts with price_ (not prod_, which won't work).",
+        body: "Easiest way: once your secret key is in the box, use the “Create my plans in Stripe” button below and the app builds them for you and fills in the Price IDs — skip the rest of this step. Prefer to do it by hand? Open “Products” → “Add product”, name it, set the amount, pick “One time” (or “Recurring” if your plan renews), and save. Then open the product, click the price you made, and copy the “Price ID” from the top-right of the price page — it starts with price_ (not prod_, which won't work).",
         link: { url: "https://dashboard.stripe.com/products", label: "Open Stripe → Products" },
       },
       {
@@ -150,14 +150,14 @@ export const SETUP_STEPS: SetupStepDef[] = [
       },
       {
         name: "NEXT_PUBLIC_STRIPE_PRICE_STARTER",
-        label: "Basic plan — Price ID",
+        label: "The Kit — Price ID",
         placeholder: "price_… (not prod_…)",
         secret: false,
         required: false,
       },
       {
         name: "NEXT_PUBLIC_STRIPE_PRICE_PRO",
-        label: "Pro plan — Price ID",
+        label: "The Kit + Vault — Price ID",
         placeholder: "price_… (not prod_…)",
         secret: false,
         required: false,
@@ -254,8 +254,26 @@ alter table public.subscriptions enable row level security;
 create policy "Subscriptions are viewable by their owner"
   on public.subscriptions for select using (auth.uid() = user_id);
 
+create table if not exists public.purchases (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  plan_id text not null,
+  price_id text,
+  stripe_customer_id text,
+  stripe_checkout_session_id text unique,
+  amount_total integer,
+  currency text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.purchases enable row level security;
+
+create policy "Purchases are viewable by their owner"
+  on public.purchases for select using (auth.uid() = user_id);
+
 -- Role privileges (required on top of RLS). service_role bypasses RLS and needs
--- these so the Stripe webhook can write subscription rows.
+-- these so the Stripe webhook can write subscription/purchase rows.
 grant select, insert, update, delete on public.profiles to anon, authenticated, service_role;
 grant select, insert, update, delete on public.subscriptions to anon, authenticated, service_role;
+grant select, insert, update, delete on public.purchases to anon, authenticated, service_role;
 `;

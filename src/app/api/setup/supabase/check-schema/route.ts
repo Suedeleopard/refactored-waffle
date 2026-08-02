@@ -9,7 +9,7 @@ import { supabaseKeyHeaders } from "@/lib/supabase/validate";
   401 means the key, not the table.
 */
 
-const REQUIRED_TABLES = ["profiles", "subscriptions"];
+const REQUIRED_TABLES = ["profiles", "subscriptions", "purchases"];
 
 export async function POST(request: NextRequest) {
   const { url, key } = (await request.json()) as { url?: string; key?: string };

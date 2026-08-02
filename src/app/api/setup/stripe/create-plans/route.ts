@@ -47,12 +47,13 @@ async function ensurePlan(
   const product = await findOrCreateProduct(stripe, plan);
 
   const unitAmount = Math.round(plan.amount * 100);
+  const isRecurring = plan.mode === "subscription";
   const prices = await stripe.prices.list({ product: product.id, active: true, limit: 100 });
   const match = prices.data.find(
     (p) =>
       p.unit_amount === unitAmount &&
       p.currency === plan.currency &&
-      p.recurring?.interval === plan.interval
+      (isRecurring ? p.recurring?.interval === plan.interval : !p.recurring)
   );
   if (match) return { priceId: match.id, reused: true };
 
@@ -60,7 +61,7 @@ async function ensurePlan(
     product: product.id,
     unit_amount: unitAmount,
     currency: plan.currency,
-    recurring: { interval: plan.interval },
+    ...(isRecurring ? { recurring: { interval: plan.interval! } } : {}),
     metadata: { tsc_plan_id: plan.id },
   });
   return { priceId: price.id, reused: false };

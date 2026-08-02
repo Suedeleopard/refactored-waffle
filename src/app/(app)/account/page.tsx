@@ -3,41 +3,24 @@ import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
 import { plans } from "@/lib/config";
 import { isStripeConfigured } from "@/lib/env";
+import { getPurchases } from "@/lib/purchases";
 
 export const metadata: Metadata = { title: "Account" };
 
-type Subscription = {
-  status: string | null;
-  price_id: string | null;
-  current_period_end: string | null;
-};
-
 export default async function AccountPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status, price_id, current_period_end")
-    .eq("user_id", user!.id)
-    .maybeSingle<Subscription>();
-
+  const purchases = await getPurchases();
+  const ownedIds = new Set(purchases.map((p) => p.plan_id));
+  const ownedPlans = plans.filter((p) => ownedIds.has(p.id));
+  const unownedPlans = plans.filter((p) => !ownedIds.has(p.id));
   const stripeReady = isStripeConfigured();
-  const activeStatuses = ["active", "trialing"];
-  const isActive = subscription && activeStatuses.includes(subscription.status ?? "");
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-light tracking-tight">Account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your plan and billing.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Manage what you own.</p>
       </div>
 
       {!stripeReady && (
@@ -51,34 +34,34 @@ export default async function AccountPage() {
               <a href="/setup" className="text-primary hover:underline">
                 setup wizard
               </a>{" "}
-              to enable checkout and billing.
+              to enable checkout.
             </p>
           </CardContent>
         </Card>
       )}
 
-      {isActive ? (
+      {ownedPlans.length > 0 && (
         <Card>
-          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <Badge variant="success">Active</Badge>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Renews{" "}
-                {subscription?.current_period_end
-                  ? new Date(subscription.current_period_end).toLocaleDateString()
-                  : "—"}
-              </p>
-            </div>
-            <form action="/api/stripe/portal" method="post">
-              <Button type="submit" variant="outline">
-                Manage billing
-              </Button>
-            </form>
+          <CardContent className="p-6">
+            <Badge variant="success">Owned</Badge>
+            <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+              {ownedPlans.map((plan) => {
+                const purchase = purchases.find((p) => p.plan_id === plan.id);
+                return (
+                  <li key={plan.id}>
+                    {plan.name}
+                    {purchase && ` — purchased ${new Date(purchase.created_at).toLocaleDateString()}`}
+                  </li>
+                );
+              })}
+            </ul>
           </CardContent>
         </Card>
-      ) : (
+      )}
+
+      {unownedPlans.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {plans.map((plan) => (
+          {unownedPlans.map((plan) => (
             <Card
               key={plan.id}
               className={plan.featured ? "border-primary/60 ring-1 ring-primary/30" : ""}
@@ -104,7 +87,7 @@ export default async function AccountPage() {
                     variant={plan.featured ? "default" : "outline"}
                     disabled={!stripeReady || !plan.priceId}
                   >
-                    {plan.priceId ? `Choose ${plan.name}` : "Price not set"}
+                    {plan.priceId ? `Get ${plan.name}` : "Price not set"}
                   </Button>
                 </form>
               </CardContent>

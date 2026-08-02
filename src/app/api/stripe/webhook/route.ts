@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
+import { plans } from "@/lib/config";
 
 /**
  * Stripe webhook. Verifies the signature, then syncs subscription state into
@@ -59,6 +60,30 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  /** Record a one-time purchase from a completed "payment" mode Checkout session. */
+  async function recordPurchase(session: Stripe.Checkout.Session) {
+    const userId =
+      (session.metadata?.supabase_user_id as string | undefined) ??
+      session.client_reference_id ??
+      null;
+    const planId = session.metadata?.tsc_plan_id as string | undefined;
+    if (!userId || !planId) return;
+
+    const plan = plans.find((p) => p.id === planId);
+    await supabase.from("purchases").upsert(
+      {
+        user_id: userId,
+        plan_id: planId,
+        price_id: plan?.priceId ?? null,
+        stripe_customer_id: session.customer as string,
+        stripe_checkout_session_id: session.id,
+        amount_total: session.amount_total,
+        currency: session.currency,
+      },
+      { onConflict: "stripe_checkout_session_id" }
+    );
+  }
+
   switch (event.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -67,7 +92,7 @@ export async function POST(request: NextRequest) {
       break;
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.subscription) {
+      if (session.mode === "subscription" && session.subscription) {
         // Persist the user mapping onto the Stripe subscription itself, so every
         // later subscription event already carries it. (Checkout also sets this
         // via subscription_data.metadata — this makes it authoritative.)
@@ -77,6 +102,8 @@ export async function POST(request: NextRequest) {
             })
           : await stripe.subscriptions.retrieve(session.subscription as string);
         await upsertSubscription(sub);
+      } else if (session.mode === "payment") {
+        await recordPurchase(session);
       }
       break;
     }

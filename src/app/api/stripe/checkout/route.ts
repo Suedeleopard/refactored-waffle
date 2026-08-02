@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, getOrCreateCustomer } from "@/lib/billing";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, plans } from "@/lib/config";
 
 /** Create a Stripe Checkout session for the selected price and redirect to it. */
 export async function POST(request: NextRequest) {
@@ -20,22 +20,27 @@ export async function POST(request: NextRequest) {
 
   const form = await request.formData();
   const priceId = String(form.get("priceId") ?? "");
-  if (!priceId) {
+  const plan = plans.find((p) => p.priceId === priceId);
+  if (!priceId || !plan) {
     return NextResponse.redirect(new URL("/account?error=missing_price", request.url), {
       status: 303,
     });
   }
 
   const customerId = await getOrCreateCustomer(stripe, user.id, user.email!);
+  const isSubscription = plan.mode === "subscription";
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
-    mode: "subscription",
+    mode: isSubscription ? "subscription" : "payment",
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${siteConfig.url}/account?checkout=success`,
     cancel_url: `${siteConfig.url}/account?checkout=cancelled`,
     client_reference_id: user.id,
-    subscription_data: { metadata: { supabase_user_id: user.id } },
+    metadata: { supabase_user_id: user.id, tsc_plan_id: plan.id },
+    ...(isSubscription
+      ? { subscription_data: { metadata: { supabase_user_id: user.id } } }
+      : {}),
   });
 
   if (!session.url) {
