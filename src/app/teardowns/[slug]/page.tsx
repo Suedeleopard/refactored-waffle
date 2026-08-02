@@ -101,6 +101,15 @@ export default async function TeardownPage({ params }: Props) {
             </div>
           </section>
 
+          {teardown.outcome && (
+            <section className="mt-16 rounded-lg border border-primary/40 bg-primary/5 p-8 sm:p-10">
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">
+                What happened
+              </h2>
+              <p className="mt-4 text-lg">{teardown.outcome}</p>
+            </section>
+          )}
+
           <aside className="mt-20 rounded-lg border border-border bg-card p-10 text-center">
             <Badge variant="muted" className="mb-5">
               Your turn

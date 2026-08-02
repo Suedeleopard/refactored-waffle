@@ -44,11 +44,59 @@ export type Teardown = {
   rationale: string;
   /** The ideas. Four to six is the right number: enough to prove it, few enough to read. */
   ideas: { name: string; body: string }[];
+  /**
+   * What happened. Only for "shipped" — it's the reason that kind exists, and
+   * the single most persuasive thing on the page. Keep every claim defensible.
+   */
+  outcome?: string;
   /** Free-text date label, e.g. "March 2026". Display only. */
   published: string;
 };
 
 export const teardowns: Teardown[] = [
+  {
+    slug: "nydg-colorfull",
+    kind: "shipped",
+    credit: "NYDG Foundation — ColorFull",
+    x: "A dermatology clinic",
+    y: "A global beauty brand's purpose platform",
+    title: "A dermatology clinic behaving like Dove",
+    standfirst:
+      "Where Dove has the Self Esteem Project, NYDG has ColorFull. Not a campaign with a cause attached — a twelve-month platform a clinic could own.",
+    sharedAudience:
+      "People who buy premium skincare and already understand purpose platforms, because mass beauty spent twenty years teaching them. They read a Dove-shaped idea fluently. They skip charity advertising, and they skip clinical advertising, and NYDG had been making both.",
+    rationale:
+      "The first attempt was product-led. Clean, premium, well made, and completely ignored — twenty-seven screens in Times Square and no measurable lift, because a campaign that looks like every other skincare campaign gets filtered out in the one place on earth where people filter hardest. The foundation supporting people with albinism came up almost in passing, the way genuinely interesting things do when you're too close to them. The move was not to make a charity ad. It was to notice that the beauty industry had already built the exact vehicle for this — a long-running, named, purpose platform that sits alongside the products rather than interrupting them — and that a dermatology group had never behaved that way. Novel subject, familiar structure. Attention from one, adoption from the other.",
+    ideas: [
+      {
+        name: "Name it like a platform, not a campaign",
+        body: "ColorFull — Color and Full. A name that can run for years across cities and partners, rather than a line that expires when the media buy does. Campaigns end. Platforms accumulate.",
+      },
+      {
+        name: "Invert the deficit",
+        body: "People with albinism aren't missing a colour. They have a specific one — an Albus tone unique to them. The whole idea turns on refusing the framing the category assumes, and it produced the line: My Albinism. My Color.",
+      },
+      {
+        name: "Borrow the colour-swatch language",
+        body: "Rendering that tone as a swatch takes a medical condition and puts it in the visual grammar of cosmetics and paint charts — a system this audience already reads as aspirational and precise. The exhibition was built around the photography and the swatch concept.",
+      },
+      {
+        name: "Cast it like fashion, shoot it like journalism",
+        body: "Diandra Forrest, the world's first supermodel with albinism, photographed by Pulitzer Prize winner and Nat Geo photographer Stephanie Sinclair. Beauty conventions for the casting, documentary credibility for the images. Neither reads as an appeal.",
+      },
+      {
+        name: "Pride, not pity",
+        body: "Built on identity rather than struggle. People don't engage because they've been made to feel guilty, they engage because they've been invited into something. Worthy repels this audience; positive brings them in.",
+      },
+      {
+        name: "Treat the placement as the amplifier",
+        body: "Times Square was the trigger, not the goal — the first time a person with albinism was shown there. From that the platform travelled to LA, Cape Town, Hong Kong and London. Big visibility doesn't create attention. It exposes whether you've earned any.",
+      },
+    ],
+    outcome:
+      "A 4,000% increase in sales of NYDG's SPF cream on the previous year, with 100% of profits going to the cause. Coverage in Forbes, NowThis and National Geographic. A twelve-month global initiative backed by the United Nations, and partnerships with Oxford University, Sesame Workshop, the Council for Global Affairs, Marlborough School for Girls and NOAH.",
+    published: "April 2026",
+  },
   {
     slug: "restaurant-art-gallery",
     kind: "made",
