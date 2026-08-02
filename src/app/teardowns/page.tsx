@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTeardowns } from "@/lib/teardowns";
+import { getTeardowns, kindLabel } from "@/lib/teardowns";
 
 export const metadata: Metadata = {
   title: "Teardowns",
@@ -29,8 +29,9 @@ export default function TeardownsPage() {
               Teardowns
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
-              The method applied in full, one industry at a time. Read a few before you decide
-              whether it would work on yours.
+              The method applied in full, one industry at a time. Some are businesses already
+              behaving this way, taken apart to show how. The rest are mine, and nobody is doing
+              them yet.
             </p>
           </div>
 
@@ -38,7 +39,15 @@ export default function TeardownsPage() {
             {teardowns.map((t) => (
               <Card key={t.slug} className="group transition-colors hover:border-primary/40">
                 <CardContent className="flex h-full flex-col p-8">
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <Badge variant={t.kind === "made" ? "default" : "muted"}>
+                      {kindLabel(t).label}
+                    </Badge>
+                    {t.credit && (
+                      <span className="text-xs text-muted-foreground">{t.credit}</span>
+                    )}
+                  </div>
+                  <p className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">
                     {t.x} &rarr; {t.y}
                   </p>
                   <h2 className="mt-3 font-display text-2xl font-light leading-snug tracking-tight">

@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTeardown, getTeardowns } from "@/lib/teardowns";
+import { getTeardown, getTeardowns, kindLabel } from "@/lib/teardowns";
 import { plans } from "@/lib/config";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -29,6 +29,7 @@ export default async function TeardownPage({ params }: Props) {
   if (!teardown) notFound();
 
   const kit = plans[0];
+  const kind = kindLabel(teardown);
 
   return (
     <>
@@ -44,13 +45,19 @@ export default async function TeardownPage({ params }: Props) {
           </Link>
 
           <header className="mt-10">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">
-              {teardown.x} &rarr; {teardown.y}
-            </p>
-            <h1 className="mt-4 font-display text-4xl font-light leading-[1.1] tracking-tight sm:text-5xl">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={teardown.kind === "made" ? "default" : "muted"}>{kind.label}</Badge>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                {teardown.x} &rarr; {teardown.y}
+              </p>
+            </div>
+            <h1 className="mt-5 font-display text-4xl font-light leading-[1.1] tracking-tight sm:text-5xl">
               {teardown.title}
             </h1>
             <p className="mt-6 text-lg text-muted-foreground">{teardown.standfirst}</p>
+            <p className="mt-6 border-l-2 border-border pl-4 text-sm text-muted-foreground">
+              {kind.note}
+            </p>
             <p className="mt-6 text-xs uppercase tracking-widest text-muted-foreground">
               {teardown.published}
             </p>
@@ -73,7 +80,7 @@ export default async function TeardownPage({ params }: Props) {
 
           <section className="mt-16">
             <h2 className="font-display text-3xl font-light tracking-tight">
-              What would naturally exist
+              {teardown.kind === "made" ? "What would naturally exist" : "What they actually do"}
             </h2>
             <div className="mt-8 space-y-4">
               {teardown.ideas.map((idea, i) => (
