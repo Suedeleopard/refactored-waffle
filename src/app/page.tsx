@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { marketing, plans, sprint } from "@/lib/config";
-import { getTeardowns } from "@/lib/teardowns";
+import { getFeaturedTeardown, getRestOfTeardowns, kindLabel } from "@/lib/teardowns";
 import { previewSteps, lockedSteps, worksheetPrompts, outreachTemplates } from "@/lib/kit";
 
 // Copy comes from src/lib/config.ts (marketing.features). Icons are paired by
@@ -20,7 +20,8 @@ const features = marketing.features.map((f, i) => ({
 
 export default function Home() {
   const kit = plans[0];
-  const teardowns = getTeardowns().slice(0, 3);
+  const featured = getFeaturedTeardown();
+  const teardowns = getRestOfTeardowns().slice(0, 3);
 
   return (
     <>
@@ -42,7 +43,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link href="/teardowns">
+                <Link href={`/teardowns/${featured.slug}`}>
                   See it work <ArrowRight />
                 </Link>
               </Button>
@@ -50,6 +51,15 @@ export default function Home() {
                 <Link href="#kit">Get The Kit &mdash; {kit.priceLabel}</Link>
               </Button>
             </div>
+
+            <ul className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
+              {marketing.proof.map((p) => (
+                <li key={p} className="flex items-center gap-2">
+                  <Check className="size-4 text-primary" />
+                  {p}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -62,7 +72,8 @@ export default function Home() {
               </h2>
               <p className="mt-3 text-muted-foreground">
                 Each teardown takes an industry, borrows behaviour from somewhere its customers
-                already spend money, and pushes it far enough to see whether it holds.
+                already spend money, and pushes it far enough to see whether it holds. Some
+                shipped. Some are waiting for someone to build them.
               </p>
             </div>
             <Link
@@ -73,7 +84,40 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-3">
+          {/* The shipped one leads. A real result outsells an invented idea. */}
+          <Card className="group mt-12 border-primary/40 transition-colors hover:border-primary/70">
+            <CardContent className="grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.2fr_1fr]">
+              <div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <Badge>{kindLabel(featured).label}</Badge>
+                  {featured.credit && (
+                    <span className="text-xs text-muted-foreground">{featured.credit}</span>
+                  )}
+                </div>
+                <h3 className="mt-5 font-display text-3xl font-light leading-snug tracking-tight">
+                  {featured.title}
+                </h3>
+                <p className="mt-4 text-muted-foreground">{featured.standfirst}</p>
+                <Link
+                  href={`/teardowns/${featured.slug}`}
+                  className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary"
+                >
+                  Read the whole thing
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+              {featured.outcome && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 p-6">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                    What happened
+                  </p>
+                  <p className="mt-3 text-sm">{featured.outcome}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
             {teardowns.map((t) => (
               <Card key={t.slug} className="group transition-colors hover:border-primary/40">
                 <CardContent className="flex h-full flex-col p-7">

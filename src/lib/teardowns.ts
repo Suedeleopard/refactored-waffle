@@ -233,3 +233,17 @@ export function kindLabel(t: Teardown): { label: string; note: string } {
 export function getTeardown(slug: string): Teardown | undefined {
   return teardowns.find((t) => t.slug === slug);
 }
+
+/**
+ * The one to lead with. Prefers the most recent shipped teardown, because a
+ * real result outsells an invented idea every time. Falls back to the newest.
+ */
+export function getFeaturedTeardown(): Teardown {
+  return teardowns.find((t) => t.kind === "shipped") ?? teardowns[0];
+}
+
+/** Everything except the featured one, newest first. */
+export function getRestOfTeardowns(): Teardown[] {
+  const featured = getFeaturedTeardown();
+  return teardowns.filter((t) => t.slug !== featured.slug);
+}

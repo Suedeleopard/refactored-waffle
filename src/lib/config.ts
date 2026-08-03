@@ -17,7 +17,7 @@ export const siteConfig = {
   tagline: "A method for not sounding like everyone else in the room.",
   /** Meta/OG description for search + social sharing. */
   description:
-    "X Behaving Like Y is a method for winning work you shouldn't win. Borrow behaviour from an industry your client's audience already trusts, so your thinking lands as new enough to notice and familiar enough to say yes to.",
+    "The method behind ColorFull, a UN-backed campaign that lifted NYDG's SPF sales by 4,000%. Borrow behaviour from an industry your client's audience already trusts, so the idea lands as new enough to notice and familiar enough to approve.",
   /** Your public URL (no trailing slash). Set automatically from NEXT_PUBLIC_SITE_URL. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   /** The from/support address for emails. */
@@ -32,28 +32,36 @@ export const siteConfig = {
 /* ── Marketing copy (the landing page) ────────────────────────────────────── */
 export const marketing = {
   hero: {
-    badge: "The method, the swipe file, the worksheet",
+    badge: "The method behind ColorFull",
     headlineTop: "Everyone in the room",
     headlineAccent: "is saying the same thing.",
     subhead:
-      "X Behaving Like Y is a method for borrowing behaviour from an industry your client's audience already trusts. New enough to get noticed. Familiar enough to get adopted. Built for the pitch you have to win, not for a brainstorm.",
+      "This is how you don't. Borrow behaviour from an industry your client's audience already trusts, and the idea lands as new enough to notice and familiar enough to approve. It put a dermatology clinic in Times Square and took it to the United Nations.",
   },
+  /* Proof strip, directly under the hero buttons. Every claim here is carried in
+     full by the NYDG teardown, one click away. Don't put anything up here you
+     can't substantiate down there. */
+  proof: [
+    "Backed by the United Nations",
+    "Forbes, NowThis & National Geographic",
+    "4,000% increase in SPF sales",
+  ],
   features: [
     {
       title: "Same audience, different behaviour",
-      body: "The whole method in one line. Borrow from where your client's customers already spend money and the risk of a bold idea drops away.",
+      body: "The whole method in one line. Borrow from where your client's customers already spend money, and the risk that normally kills a bold idea drops away.",
     },
     {
-      title: "Built for a live opportunity",
-      body: "Not a creativity exercise. Run it against the thing you actually have to win, with a deadline attached.",
+      title: "For the pitch you have to win",
+      body: "Not a creativity exercise and not an away day. Run it against the live opportunity with a deadline attached and a competitor in the next room.",
     },
     {
-      title: "A swipe file you can read first",
-      body: "Worked examples across sectors, so you can watch the method land before you trust it with your own pitch.",
+      title: "Proven, not theorised",
+      body: "The same eleven steps produced ColorFull: Times Square, a UN partnership, and a 4,000% sales increase on the same product.",
     },
     {
       title: "One page, one sitting",
-      body: "The worksheet turns eleven steps into a page you fill in. No workshop, no facilitator, no away day.",
+      body: "The worksheet turns the method into eight blanks you fill in. No facilitator, no workshop, no licence.",
     },
   ],
 } as const;
