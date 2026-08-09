@@ -18,7 +18,8 @@ export async function sendEmail(opts: {
 
   const resend = new Resend(env.resendApiKey);
   await resend.emails.send({
-    from: `${siteConfig.name} <${siteConfig.supportEmail}>`,
+    from: `${siteConfig.name} <${siteConfig.fromEmail}>`,
+    replyTo: siteConfig.supportEmail,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,

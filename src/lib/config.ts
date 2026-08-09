@@ -20,8 +20,18 @@ export const siteConfig = {
     "The method behind ColorFull, a UN-backed campaign that lifted NYDG's SPF sales by 4,000%. Borrow behaviour from an industry your client's audience already trusts, so the idea lands as new enough to notice and familiar enough to approve.",
   /** Your public URL (no trailing slash). Set automatically from NEXT_PUBLIC_SITE_URL. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  /** The from/support address for emails. */
+  /** Public contact address. Shown on the legal pages; enquiries are sent here. */
   supportEmail: "thad@thadcox.co.uk",
+  /**
+   * The envelope sender for outbound mail. Must be on a domain verified in
+   * Resend, which is why it is separate from supportEmail — you can publish a
+   * contact address long before you have proved you own the domain.
+   *
+   * TEMPORARY: onboarding@resend.dev is Resend's shared sender, allowed without
+   * verification. Once thadcox.co.uk is verified (Resend → Domains → Add, then
+   * the DNS records), change this to match supportEmail.
+   */
+  fromEmail: "onboarding@resend.dev",
   /** PLACEHOLDER — your links. */
   links: {
     twitter: "https://twitter.com/",
