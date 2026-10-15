@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Shuffle, Plus, X, Copy, Check, RotateCcw, Star, ArrowRight } from "lucide-react";
+import { Shuffle, Plus, X, Copy, Check, RotateCcw, Star, ArrowRight, Sparkles } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,15 @@ import {
   adjacentIndustries,
   profileFields,
 } from "@/lib/remix-banks";
+import { ritualsFor } from "@/lib/ritual-library";
 
 /*
   THE REMIX BOARD — the facilitator's shared screen.
 
-  No backend, no API calls, no AI: it runs entirely in the browser so it cannot
-  fail in front of an audience, and so the thinking stays with the room.
+  Runs entirely in the browser: no API calls, nothing to fail in front of a
+  room. Picking an industry pulls its peak behaviours from a seeded library so
+  the board starts full rather than empty — a blank box is the enemy, because
+  people cannot recall on demand but they can happily correct a wrong answer.
 
   The important bit is step 4. Seeing "what a run club does" next to "what a
   plant shop could do" is where the ideas come from — a list of answers with
@@ -72,11 +75,25 @@ export default function PlayPage() {
     }, 90);
   }
 
-  function addRow() {
-    const v = doesDraft.trim();
-    if (!v) return;
-    setRows((r) => [...r, { id: Date.now(), does: v, could: "", keep: false }]);
-    setDoesDraft("");
+  function addRow(value?: string) {
+    const v = (value ?? doesDraft).trim();
+    if (!v || rows.some((r) => r.does.toLowerCase() === v.toLowerCase())) return;
+    setRows((r) => [...r, { id: Date.now() + Math.random(), does: v, could: "", keep: false }]);
+    if (!value) setDoesDraft("");
+  }
+
+  /** Everything the library knows about this industry that isn't on the board yet. */
+  const suggestions = useMemo(() => {
+    const onBoard = new Set(rows.map((r) => r.does.toLowerCase()));
+    return ritualsFor(industry).filter((s) => !onBoard.has(s.toLowerCase()));
+  }, [industry, rows]);
+
+  function addAllSuggestions() {
+    const stamp = Date.now();
+    setRows((r) => [
+      ...r,
+      ...suggestions.map((s, i) => ({ id: stamp + i, does: s, could: "", keep: false })),
+    ]);
   }
 
   function patchRow(id: number, patch: Partial<Row>) {
@@ -323,10 +340,40 @@ export default function PlayPage() {
               placeholder={`What does ${yName} do? Press enter`}
               className="h-12 text-lg"
             />
-            <Button onClick={addRow} size="lg">
+            <Button onClick={() => addRow()} size="lg">
               <Plus /> Add
             </Button>
           </div>
+
+          {/* The head start. Tap what's right, ignore what isn't. */}
+          {suggestions.length > 0 && (
+            <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="flex items-center gap-2 text-sm font-medium">
+                  <Sparkles className="size-4 text-primary" />
+                  What {yName} is known for
+                </p>
+                <Button onClick={addAllSuggestions} size="sm" variant="outline">
+                  Add all {suggestions.length}
+                </Button>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Tap the ones that ring true. Wrong ones are useful too &mdash; the room
+                correcting them is half the session.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => addRow(s)}
+                    className="rounded-md border border-dashed border-border bg-background px-3 py-2 text-sm text-left transition-colors hover:border-primary/60"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 flex flex-wrap gap-2">
             {lenses.map((l) => (
