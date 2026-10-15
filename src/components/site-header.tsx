@@ -12,6 +12,9 @@ export function SiteHeader() {
           <Link href="/teardowns" className="hover:text-foreground transition-colors">
             Teardowns
           </Link>
+          <Link href="/play" className="hover:text-foreground transition-colors">
+            Play
+          </Link>
           <Link href="/#method" className="hover:text-foreground transition-colors">
             The method
           </Link>
