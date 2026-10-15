@@ -28,6 +28,10 @@ export const env = {
   // Resend (transactional email)
   resendApiKey: process.env.RESEND_API_KEY,
 
+  // Anthropic — optional. Powers the suggest buttons on /play. Absent means
+  // those buttons hide and the seeded library still runs the session.
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 } as const;
 

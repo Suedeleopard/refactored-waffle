@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Shuffle, Plus, X, Copy, Check, RotateCcw, Star, ArrowRight, Sparkles } from "lucide-react";
+import { Shuffle, Plus, X, Copy, Check, RotateCcw, Star, ArrowRight, Sparkles, Wand2, Loader2 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,59 @@ export default function PlayPage() {
   const [activeLens, setActiveLens] = useState<string | null>(null);
 
   const [copied, setCopied] = useState(false);
+
+  /* Suggestions are optional. If the endpoint isn't configured, or fails, we
+     hide the buttons and the session carries on from the seeded library —
+     nobody watching needs to know anything was meant to happen. */
+  const [aiOff, setAiOff] = useState(false);
+  const [mode, setMode] = useState<"question" | "idea">("question");
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function suggest(payload: Record<string, unknown>) {
+    const res = await fetch("/api/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.status === 503) {
+      setAiOff(true);
+      throw new Error("not configured");
+    }
+    if (!res.ok) throw new Error(String(res.status));
+    return res.json();
+  }
+
+  async function suggestAvatar() {
+    if (!business.trim() || busy) return;
+    setBusy("avatar");
+    try {
+      const { fields } = await suggest({ kind: "avatar", business });
+      setProfile((p) => ({ ...p, ...fields }));
+    } catch {
+      /* Silent by design — see note above. */
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function sparkRow(row: Row) {
+    if (busy) return;
+    setBusy(String(row.id));
+    try {
+      const { text } = await suggest({
+        kind: "spark",
+        mode,
+        business,
+        industry,
+        behaviour: row.does,
+      });
+      patchRow(row.id, { could: text });
+    } catch {
+      /* Silent by design. */
+    } finally {
+      setBusy(null);
+    }
+  }
 
   const xName = business.trim() || "the business";
   const yName = industry.trim() || "them";
@@ -166,13 +219,28 @@ export default function PlayPage() {
 
           <Card className="mt-6">
             <CardContent className="p-6 sm:p-8">
-              <h2 className="font-display text-xl font-light tracking-tight">
-                The person they want to attract
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Fill this in together. Nobody suggests an industry until the room can
-                picture the same human being.
-              </p>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-xl font-light tracking-tight">
+                    The person they want to attract
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Fill this in together. Nobody suggests an industry until the room can
+                    picture the same human being.
+                  </p>
+                </div>
+                {!aiOff && (
+                  <Button
+                    onClick={suggestAvatar}
+                    variant="outline"
+                    size="sm"
+                    disabled={!business.trim() || busy === "avatar"}
+                  >
+                    {busy === "avatar" ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                    Suggest
+                  </Button>
+                )}
+              </div>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 {profileFields.map((f) => (
                   <div key={f.key} className="space-y-2">
@@ -397,6 +465,35 @@ export default function PlayPage() {
             </p>
           )}
 
+          {!aiOff && rows.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+              <span className="text-sm font-medium">The spark button gives you:</span>
+              <div className="flex overflow-hidden rounded-md border border-border">
+                <button
+                  onClick={() => setMode("question")}
+                  className={`px-3 py-1.5 text-sm transition-colors ${
+                    mode === "question" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  }`}
+                >
+                  A question
+                </button>
+                <button
+                  onClick={() => setMode("idea")}
+                  className={`px-3 py-1.5 text-sm transition-colors ${
+                    mode === "idea" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  }`}
+                >
+                  An idea
+                </button>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {mode === "question"
+                  ? "The room answers it. You stay in charge."
+                  : "It answers for you. Faster, but the room goes quiet."}
+              </span>
+            </div>
+          )}
+
           {rows.length > 0 && (
             <div className="mt-8 overflow-hidden rounded-lg border border-border">
               <div className="grid grid-cols-[1fr_auto_1fr] gap-3 border-b border-border bg-card px-4 py-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground sm:px-6">
@@ -424,6 +521,20 @@ export default function PlayPage() {
                       placeholder="…?"
                       className="h-11 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
                     />
+                    {!aiOff && (
+                      <button
+                        onClick={() => sparkRow(row)}
+                        disabled={busy !== null}
+                        className="shrink-0 text-muted-foreground/40 transition-colors hover:text-primary disabled:opacity-40"
+                        aria-label="Spark this row"
+                      >
+                        {busy === String(row.id) ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Wand2 className="size-4" />
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => patchRow(row.id, { keep: !row.keep })}
                       className={`shrink-0 transition-colors ${
