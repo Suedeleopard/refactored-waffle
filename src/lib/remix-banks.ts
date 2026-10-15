@@ -40,30 +40,50 @@ export const wildcardIndustries = [
   "Library",
 ];
 
-/** The safe ones. For when the wildcard is too big a leap for the room. */
+/** The safe ones. Where a normal audience actually spends, for when the room is quiet. */
 export const adjacentIndustries = [
   "Coffee culture",
-  "Gyms and fitness",
-  "Fashion and streetwear",
-  "Beauty and skincare",
-  "Travel",
-  "Homewares",
-  "Wellness",
-  "Food and restaurants",
+  "Restaurants and food",
   "Live music",
-  "Podcasting",
-  "Gaming",
+  "Gyms and fitness",
   "Running clubs",
-  "Craft and DIY",
-  "Boutique retail",
-  "Events and ticketing",
+  "Fashion and streetwear",
+  "Beauty and salons",
+  "Interiors and furniture",
+  "Travel",
+  "Wellness",
+  "Pets",
+  "Books and bookshops",
+  "Vinyl and record shops",
+  "Pottery and craft classes",
+  "Farmers markets",
+  "Cycling",
+  "Natural wine",
+  "Gaming",
+  "Podcasts",
+  "Festivals",
+];
+
+/**
+ * The audience card. Five fields the room fills in together so everyone is
+ * picturing the same person before anyone suggests an industry.
+ */
+export type ProfileField = { key: string; label: string; placeholder: string };
+
+export const profileFields: ProfileField[] = [
+  { key: "age", label: "Age and life stage", placeholder: "Late twenties, renting, first proper job" },
+  { key: "lives", label: "Where they live", placeholder: "Flat share in a city, no outdoor space" },
+  { key: "values", label: "What they care about", placeholder: "Making a rented place feel like theirs" },
+  { key: "follows", label: "Who they follow", placeholder: "Interiors accounts, a few chefs, local makers" },
+  { key: "weekend", label: "A typical weekend", placeholder: "Coffee, a market, friends round for dinner" },
 ];
 
 export type Lens = { key: string; label: string; question: string; hint: string };
 
 /**
- * The rescue. Run these against the Y industry when free association stalls.
- * Seven is the limit of what a room will sit through before it feels like work.
+ * The unstickers. These prompt what goes in the LEFT column — things the
+ * borrowed industry actually does. They are nudges for a quiet room, not a
+ * form to work through in order.
  */
 export const lenses: Lens[] = [
   {

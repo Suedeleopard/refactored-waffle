@@ -2,31 +2,38 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Shuffle, Plus, X, Copy, Check, RotateCcw } from "lucide-react";
+import { Shuffle, Plus, X, Copy, Check, RotateCcw, Star, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { lenses, wildcardIndustries, adjacentIndustries } from "@/lib/remix-banks";
+import {
+  lenses,
+  wildcardIndustries,
+  adjacentIndustries,
+  profileFields,
+} from "@/lib/remix-banks";
 
 /*
-  THE REMIX BOARD — the live session tool.
+  THE REMIX BOARD — the facilitator's shared screen.
 
-  Deliberately has no backend, no API calls and no AI. It runs entirely in the
-  browser so it cannot fail in front of an audience, and so the thinking stays
-  with the room rather than a model. Its only jobs: hold what people shout,
-  keep the facilitator on structure, and roll the wildcard.
+  No backend, no API calls, no AI: it runs entirely in the browser so it cannot
+  fail in front of an audience, and so the thinking stays with the room.
+
+  The important bit is step 4. Seeing "what a run club does" next to "what a
+  plant shop could do" is where the ideas come from — a list of answers with
+  the translation hidden somewhere else produces nothing.
 */
 
-type Idea = { name: string; body: string };
+type Row = { id: number; does: string; could: string; keep: boolean };
 
-const SECTION = "mx-auto max-w-4xl px-6";
+const SECTION = "mx-auto max-w-5xl px-6";
 
 export default function PlayPage() {
   const [business, setBusiness] = useState("");
-  const [audience, setAudience] = useState("");
+  const [profile, setProfile] = useState<Record<string, string>>({});
 
   const [spend, setSpend] = useState<string[]>([]);
   const [spendDraft, setSpendDraft] = useState("");
@@ -34,14 +41,23 @@ export default function PlayPage() {
   const [industry, setIndustry] = useState("");
   const [rolling, setRolling] = useState(false);
 
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [ideaName, setIdeaName] = useState("");
-  const [ideaBody, setIdeaBody] = useState("");
+  const [rows, setRows] = useState<Row[]>([]);
+  const [doesDraft, setDoesDraft] = useState("");
+  const [activeLens, setActiveLens] = useState<string | null>(null);
 
   const [copied, setCopied] = useState(false);
 
-  /** Spin through the bank before landing. The suspense is the point. */
+  const xName = business.trim() || "the business";
+  const yName = industry.trim() || "them";
+
+  function addSpend(value?: string) {
+    const v = (value ?? spendDraft).trim();
+    if (!v || spend.includes(v)) return;
+    setSpend((s) => [...s, v]);
+    if (!value) setSpendDraft("");
+  }
+
+  /** Secondary to picking from the spend list — a stretch, not the main move. */
   function rollWildcard() {
     if (rolling) return;
     setRolling(true);
@@ -56,46 +72,42 @@ export default function PlayPage() {
     }, 90);
   }
 
-  function addSpend() {
-    const v = spendDraft.trim();
+  function addRow() {
+    const v = doesDraft.trim();
     if (!v) return;
-    setSpend((s) => [...s, v]);
-    setSpendDraft("");
+    setRows((r) => [...r, { id: Date.now(), does: v, could: "", keep: false }]);
+    setDoesDraft("");
   }
 
-  function addIdea() {
-    const n = ideaName.trim();
-    if (!n) return;
-    setIdeas((i) => [...i, { name: n, body: ideaBody.trim() }]);
-    setIdeaName("");
-    setIdeaBody("");
+  function patchRow(id: number, patch: Partial<Row>) {
+    setRows((r) => r.map((row) => (row.id === id ? { ...row, ...patch } : row)));
   }
 
   function reset() {
     setBusiness("");
-    setAudience("");
+    setProfile({});
     setSpend([]);
     setIndustry("");
-    setAnswers({});
-    setIdeas([]);
+    setRows([]);
+    setActiveLens(null);
   }
 
+  const kept = rows.filter((r) => r.keep && r.could.trim());
+
   const summary = useMemo(() => {
-    const lines = [
-      `${business || "[business]"} behaving like a ${industry || "[industry]"}`,
+    const profileLines = profileFields
+      .filter((f) => profile[f.key]?.trim())
+      .map((f) => `  ${f.label}: ${profile[f.key].trim()}`);
+    const out = [
+      `${xName} behaving like ${yName}`,
       "",
-      `Audience: ${audience || "—"}`,
-      spend.length ? `Already spends on: ${spend.join(", ")}` : "",
-      "",
-      ...lenses
-        .filter((l) => answers[l.key]?.trim())
-        .map((l) => `${l.label} — ${answers[l.key].trim()}`),
-      "",
-      ...(ideas.length ? ["Ideas:"] : []),
-      ...ideas.map((i, n) => `${n + 1}. ${i.name}${i.body ? ` — ${i.body}` : ""}`),
+      ...(profileLines.length ? ["Who we're trying to reach:", ...profileLines, ""] : []),
+      ...(spend.length ? [`They already spend on: ${spend.join(", ")}`, ""] : []),
+      ...(kept.length ? ["The keepers:"] : []),
+      ...kept.map((r, i) => `${i + 1}. ${r.does}  →  ${r.could}`),
     ];
-    return lines.filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n").trim();
-  }, [business, audience, spend, industry, answers, ideas]);
+    return out.join("\n").trim();
+  }, [xName, yName, profile, spend, kept]);
 
   async function copySummary() {
     try {
@@ -107,44 +119,63 @@ export default function PlayPage() {
     }
   }
 
+  const lensHint = lenses.find((l) => l.key === activeLens);
+
   return (
     <>
       <SiteHeader />
       <main className="flex-1 py-12 sm:py-16">
-        {/* 1 — the setup */}
+        {/* 1 — who are we reaching */}
         <section className={SECTION}>
           <Badge variant="muted" className="mb-5">
             Step 1
           </Badge>
           <h1 className="font-display text-4xl font-light tracking-tight sm:text-5xl">
-            Who are we remixing?
+            Who are we remixing, and for whom?
           </h1>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="business" className="text-sm font-medium">
-                The business
-              </label>
-              <Input
-                id="business"
-                value={business}
-                onChange={(e) => setBusiness(e.target.value)}
-                placeholder="An independent plant shop"
-                className="h-12 text-lg"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="audience" className="text-sm font-medium">
-                Who they want to attract
-              </label>
-              <Input
-                id="audience"
-                value={audience}
-                onChange={(e) => setAudience(e.target.value)}
-                placeholder="Late-twenties renters furnishing a first flat"
-                className="h-12 text-lg"
-              />
-            </div>
+
+          <div className="mt-8 space-y-2">
+            <label htmlFor="business" className="text-sm font-medium">
+              The business
+            </label>
+            <Input
+              id="business"
+              value={business}
+              onChange={(e) => setBusiness(e.target.value)}
+              placeholder="An independent plant shop"
+              className="h-14 text-xl"
+            />
           </div>
+
+          <Card className="mt-6">
+            <CardContent className="p-6 sm:p-8">
+              <h2 className="font-display text-xl font-light tracking-tight">
+                The person they want to attract
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Fill this in together. Nobody suggests an industry until the room can
+                picture the same human being.
+              </p>
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                {profileFields.map((f) => (
+                  <div key={f.key} className="space-y-2">
+                    <label htmlFor={f.key} className="text-sm font-medium">
+                      {f.label}
+                    </label>
+                    <Input
+                      id={f.key}
+                      value={profile[f.key] ?? ""}
+                      onChange={(e) =>
+                        setProfile((p) => ({ ...p, [f.key]: e.target.value }))
+                      }
+                      placeholder={f.placeholder}
+                      className="h-11"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
         {/* 2 — where the money already goes */}
@@ -156,7 +187,8 @@ export default function PlayPage() {
             Where does that person already spend?
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Shout them out. Not demographics — actual places the money goes.
+            Shout them out. These are the worlds we&rsquo;re allowed to borrow from &mdash;
+            that&rsquo;s what makes a bold idea feel safe.
           </p>
 
           <div className="mt-6 flex gap-2">
@@ -164,205 +196,246 @@ export default function PlayPage() {
               value={spendDraft}
               onChange={(e) => setSpendDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addSpend()}
-              placeholder="Add one and press enter"
+              placeholder="Type one and press enter"
               className="h-12 text-lg"
             />
-            <Button onClick={addSpend} size="lg" variant="outline" aria-label="Add">
+            <Button onClick={() => addSpend()} size="lg" variant="outline" aria-label="Add">
               <Plus />
             </Button>
           </div>
 
           {spend.length > 0 && (
             <div className="mt-5 flex flex-wrap gap-2">
-              {spend.map((s, i) => (
-                <button
-                  key={`${s}-${i}`}
-                  onClick={() => setSpend((list) => list.filter((_, n) => n !== i))}
-                  className="group inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm transition-colors hover:border-destructive/50"
+              {spend.map((s) => (
+                <span
+                  key={s}
+                  className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
                 >
                   {s}
-                  <X className="size-3.5 text-muted-foreground group-hover:text-destructive" />
-                </button>
+                  <button
+                    onClick={() => setSpend((l) => l.filter((x) => x !== s))}
+                    className="text-muted-foreground transition-colors hover:text-destructive"
+                    aria-label={`Remove ${s}`}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </span>
               ))}
             </div>
           )}
 
-          <details className="mt-6">
-            <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-              Room gone quiet? Prompts
-            </summary>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {adjacentIndustries.map((a) => (
+          <p className="mt-8 text-sm text-muted-foreground">Room gone quiet? Tap to add:</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {adjacentIndustries
+              .filter((a) => !spend.includes(a))
+              .map((a) => (
                 <button
                   key={a}
-                  onClick={() => setSpend((s) => (s.includes(a) ? s : [...s, a]))}
-                  className="rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                  onClick={() => addSpend(a)}
+                  className="rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
                 >
-                  {a}
+                  + {a}
                 </button>
               ))}
-            </div>
-          </details>
+          </div>
         </section>
 
-        {/* 3 — the pick */}
+        {/* 3 — pick from the list you just built */}
         <section className={`${SECTION} mt-16`}>
           <Badge variant="muted" className="mb-5">
             Step 3
           </Badge>
           <h2 className="font-display text-3xl font-light tracking-tight sm:text-4xl">
-            Pick the world we&rsquo;re borrowing from
+            Pick one of those worlds
           </h2>
+          <p className="mt-3 text-muted-foreground">
+            It has to come from the list above. That&rsquo;s the whole argument &mdash; the
+            audience already trusts it.
+          </p>
 
-          <div className="mt-8 rounded-lg border border-primary/40 bg-primary/5 p-8 text-center sm:p-12">
+          {spend.length > 0 ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {spend.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setIndustry(s)}
+                  className={`rounded-md border px-4 py-2.5 text-base transition-colors ${
+                    industry === s
+                      ? "border-primary bg-primary/15 text-primary"
+                      : "border-border hover:border-primary/60"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 text-sm text-muted-foreground">
+              Add a few in step 2 first and they&rsquo;ll appear here.
+            </p>
+          )}
+
+          <div className="mt-8 rounded-lg border border-primary/40 bg-primary/5 p-8 text-center sm:p-10">
             <p className="text-sm uppercase tracking-widest text-muted-foreground">
-              {business || "[business]"} behaving like a
+              {xName} behaving like
             </p>
             <p
-              className={`mt-4 font-display text-4xl font-light tracking-tight sm:text-6xl ${
+              className={`mt-3 font-display text-4xl font-light tracking-tight sm:text-6xl ${
                 rolling ? "opacity-60" : "text-primary"
               }`}
             >
               {industry || "—"}
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button onClick={rollWildcard} size="lg" disabled={rolling}>
+          </div>
+
+          <details className="mt-6">
+            <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+              Feeling brave? Roll a wildcard instead
+            </summary>
+            <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <Button onClick={rollWildcard} variant="outline" disabled={rolling}>
                 <Shuffle /> {rolling ? "Rolling…" : "Roll a wildcard"}
               </Button>
-              <Input
-                value={rolling ? "" : industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                placeholder="…or type one the room shouted"
-                className="h-11 max-w-xs text-center"
-              />
+              <p className="text-sm text-muted-foreground">
+                Breaks the audience logic on purpose. Great for the last round, risky for
+                the first.
+              </p>
             </div>
-          </div>
+          </details>
         </section>
 
-        {/* 4 — the rescue */}
+        {/* 4 — THE BOARD */}
         <section className={`${SECTION} mt-16`}>
-          <Badge variant="muted" className="mb-5">
-            Step 4
-          </Badge>
+          <Badge className="mb-5">Step 4</Badge>
           <h2 className="font-display text-3xl font-light tracking-tight sm:text-4xl">
-            What is a {industry || "[industry]"} actually like?
+            The board
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Go free-form first. Only work through these if the room stalls.
+            Fill the left column fast &mdash; everything {yName} actually does. Then go back
+            along each row and ask what the equivalent is for {xName}.
           </p>
 
-          <div className="mt-8 space-y-3">
-            {lenses.map((lens) => (
-              <Card key={lens.key}>
-                <CardContent className="p-6">
-                  <div className="flex flex-wrap items-baseline gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-                      {lens.label}
-                    </span>
-                    <span className="font-medium">{lens.question}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{lens.hint}</p>
-                  <Input
-                    value={answers[lens.key] ?? ""}
-                    onChange={(e) =>
-                      setAnswers((a) => ({ ...a, [lens.key]: e.target.value }))
-                    }
-                    placeholder="What the room said"
-                    className="mt-4 h-11"
-                  />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* 5 — bring it home */}
-        <section className={`${SECTION} mt-16`}>
-          <Badge className="mb-5">Step 5</Badge>
-          <h2 className="font-display text-3xl font-light tracking-tight sm:text-4xl">
-            So what would they do?
-          </h2>
-          <p className="mt-2 text-lg text-primary">
-            {business || "[business]"} behaving like a {industry || "[industry]"}
-          </p>
-          <p className="mt-3 text-muted-foreground">
-            Name each one. The name is what gets remembered and what makes the clip.
-          </p>
-
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 flex gap-2">
             <Input
-              value={ideaName}
-              onChange={(e) => setIdeaName(e.target.value)}
-              placeholder="Name it — e.g. Plant Growth Membership"
+              value={doesDraft}
+              onChange={(e) => setDoesDraft(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addRow()}
+              placeholder={`What does ${yName} do? Press enter`}
               className="h-12 text-lg"
             />
-            <div className="flex gap-2">
-              <Input
-                value={ideaBody}
-                onChange={(e) => setIdeaBody(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addIdea()}
-                placeholder="One line on what it is"
-                className="h-12"
-              />
-              <Button onClick={addIdea} size="lg">
-                <Plus /> Add
-              </Button>
-            </div>
+            <Button onClick={addRow} size="lg">
+              <Plus /> Add
+            </Button>
           </div>
 
-          {ideas.length > 0 && (
-            <div className="mt-8 space-y-3">
-              {ideas.map((idea, i) => (
-                <Card key={`${idea.name}-${i}`}>
-                  <CardContent className="flex items-start gap-5 p-6">
-                    <span className="font-display text-2xl font-light text-muted-foreground/50">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-semibold">{idea.name}</h3>
-                      {idea.body && (
-                        <p className="mt-1 text-muted-foreground">{idea.body}</p>
-                      )}
-                    </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {lenses.map((l) => (
+              <button
+                key={l.key}
+                onClick={() => setActiveLens(activeLens === l.key ? null : l.key)}
+                className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                  activeLens === l.key
+                    ? "border-primary bg-primary/15 text-primary"
+                    : "border-dashed border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          {lensHint && (
+            <p className="mt-3 text-sm">
+              <span className="font-medium">{lensHint.question}</span>{" "}
+              <span className="text-muted-foreground">{lensHint.hint}</span>
+            </p>
+          )}
+
+          {rows.length > 0 && (
+            <div className="mt-8 overflow-hidden rounded-lg border border-border">
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-3 border-b border-border bg-card px-4 py-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground sm:px-6">
+                <span>What {yName} does</span>
+                <span className="w-5" />
+                <span>So {xName} could&hellip;</span>
+              </div>
+              {rows.map((row) => (
+                <div
+                  key={row.id}
+                  className={`grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-border px-4 py-3 last:border-0 sm:px-6 ${
+                    row.keep ? "bg-primary/5" : ""
+                  }`}
+                >
+                  <Input
+                    value={row.does}
+                    onChange={(e) => patchRow(row.id, { does: e.target.value })}
+                    className="h-11 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+                  />
+                  <ArrowRight className="size-5 shrink-0 text-muted-foreground/60" />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={row.could}
+                      onChange={(e) => patchRow(row.id, { could: e.target.value })}
+                      placeholder="…?"
+                      className="h-11 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+                    />
                     <button
-                      onClick={() => setIdeas((l) => l.filter((_, n) => n !== i))}
-                      className="text-muted-foreground transition-colors hover:text-destructive"
-                      aria-label={`Remove ${idea.name}`}
+                      onClick={() => patchRow(row.id, { keep: !row.keep })}
+                      className={`shrink-0 transition-colors ${
+                        row.keep ? "text-primary" : "text-muted-foreground/40 hover:text-primary"
+                      }`}
+                      aria-label={row.keep ? "Unkeep" : "Keep"}
+                    >
+                      <Star className={`size-4 ${row.keep ? "fill-current" : ""}`} />
+                    </button>
+                    <button
+                      onClick={() => setRows((r) => r.filter((x) => x.id !== row.id))}
+                      className="shrink-0 text-muted-foreground/40 transition-colors hover:text-destructive"
+                      aria-label="Remove row"
                     >
                       <X className="size-4" />
                     </button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
+
+          {rows.length > 0 && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Star the rows worth keeping. {kept.length} starred so far.
+            </p>
+          )}
         </section>
 
-        {/* 6 — take it away */}
+        {/* 5 — take it away */}
         <section className={`${SECTION} mt-16`}>
           <div className="rounded-lg border border-border bg-card p-8 sm:p-10">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <h2 className="font-display text-2xl font-light tracking-tight">
-                The session, on one card
-              </h2>
+              <div>
+                <h2 className="font-display text-2xl font-light tracking-tight">
+                  Send it to them
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Copy this into the chat so whoever volunteered leaves with it.
+                </p>
+              </div>
               <div className="flex gap-2">
                 <Button onClick={copySummary} variant="outline">
                   {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy"}
                 </Button>
-                <Button onClick={reset} variant="ghost" aria-label="Start over">
-                  <RotateCcw /> New
+                <Button onClick={reset} variant="ghost">
+                  <RotateCcw /> Next business
                 </Button>
               </div>
             </div>
             <pre className="mt-6 whitespace-pre-wrap font-sans text-sm text-muted-foreground">
-              {summary || "Fill the board in and the summary builds itself."}
+              {summary || "Fill the board in and this writes itself."}
             </pre>
             <p className="mt-6 border-t border-border pt-5 text-sm text-muted-foreground">
-              Want the full method behind this?{" "}
+              The full method behind this is in{" "}
               <Link href="/#kit" className="text-primary underline underline-offset-4">
                 The Kit
-              </Link>{" "}
-              walks all eleven steps, or{" "}
+              </Link>
+              , or{" "}
               <Link href="/teardowns" className="text-primary underline underline-offset-4">
                 read a teardown
               </Link>
